@@ -166,25 +166,27 @@
     </div>
 
     <script>
+        // *** สำคัญมาก: นำ URL ที่ได้จากการ Deploy แบบ Web App มาใส่ตรงนี้ ***
+        const scriptURL = 'https://somphonrxubu.github.io/Kusuman_referin';
+
         // ตัวแปรเก็บ instance ของปฏิทิน
         let datePicker;
 
         // เมื่อโหลดหน้าเว็บเสร็จให้ตั้งค่า Flatpickr
         document.addEventListener("DOMContentLoaded", function() {
             datePicker = flatpickr("#date", {
-                locale: "th", // ตั้งเป็นภาษาไทย
-                altInput: true, // สร้างช่องแสดงผลแยกจากค่าที่ส่งไป
+                locale: "th",
+                altInput: true,
                 altInputClass: "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 bg-white",
-                altFormat: "thai", // รูปแบบที่ตั้งค่าเองด้านล่าง
-                dateFormat: "Y-m-d", // ค่าที่ส่งไปเก็บในชีต (เช่น 2026-05-05)
-                defaultDate: "today", // เริ่มต้นเป็นวันปัจจุบัน
-                disableMobile: true, // เพิ่มบรรทัดนี้: บังคับใช้ Flatpickr ในมือถือ ไม่ใช้ Native ของเครื่อง
+                altFormat: "thai",
+                dateFormat: "Y-m-d",
+                defaultDate: "today",
+                disableMobile: true,
                 formatDate: (date, format, locale) => {
-                    // สร้างรูปแบบ "5 พฤษภาคม 2569"
                     if (format === "thai") {
                         const d = date.getDate();
                         const m = flatpickr.l10ns.th.months.longhand[date.getMonth()];
-                        const y = date.getFullYear() + 543; // แปลงปี ค.ศ. เป็น พ.ศ.
+                        const y = date.getFullYear() + 543;
                         return `${d} ${m} ${y}`;
                     }
                     return flatpickr.formatDate(date, format);
@@ -193,9 +195,8 @@
         });
 
         // ฟังก์ชันจัดการเมื่อกด Submit
-        function handleFormSubmit(formObject) {
+        function handleFormSubmit(formElement) {
             
-            // แสดง Loading popup
             Swal.fire({
                 title: 'กำลังบันทึกข้อมูล...',
                 text: 'กรุณารอสักครู่',
@@ -205,39 +206,44 @@
                 }
             });
 
-            // เรียกใช้ฟังก์ชัน processForm ใน Google Apps Script
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    if(response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'บันทึกสำเร็จ!',
-                            text: response.message,
-                            confirmButtonColor: '#059669',
-                            confirmButtonText: 'ตกลง'
-                        }).then(() => {
-                            // ล้างข้อมูลฟอร์ม และเซ็ตวันที่กลับเป็นวันปัจจุบัน
-                            document.getElementById("referForm").reset();
-                            datePicker.setDate(new Date());
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'เกิดข้อผิดพลาด',
-                            text: response.message,
-                            confirmButtonColor: '#ef4444'
-                        });
-                    }
-                })
-                .withFailureHandler(function(error) {
+            // แปลงข้อมูลจากฟอร์มเป็น FormData
+            const formData = new FormData(formElement);
+
+            // ส่งข้อมูลผ่าน API ด้วย fetch ไปยัง Google Apps Script
+            fetch(scriptURL, { 
+                method: 'POST', 
+                body: formData 
+            })
+            .then(response => response.json()) // แปลงผลลัพธ์กลับมาเป็น JSON
+            .then(data => {
+                if(data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกสำเร็จ!',
+                        text: data.message,
+                        confirmButtonColor: '#059669',
+                        confirmButtonText: 'ตกลง'
+                    }).then(() => {
+                        formElement.reset();
+                        datePicker.setDate(new Date());
+                    });
+                } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'การเชื่อมต่อขัดข้อง',
-                        text: 'กรุณาลองใหม่อีกครั้ง: ' + error.message,
+                        title: 'เกิดข้อผิดพลาด',
+                        text: data.message || 'ไม่สามารถบันทึกข้อมูลได้',
                         confirmButtonColor: '#ef4444'
                     });
-                })
-                .processForm(formObject);
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'การเชื่อมต่อขัดข้อง',
+                    text: 'กรุณาลองใหม่อีกครั้ง: ' + error.message,
+                    confirmButtonColor: '#ef4444'
+                });
+            });
         }
     </script>
 </body>
