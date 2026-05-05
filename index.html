@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกข้อมูลการรับส่งต่อผู้ป่วย (Refer-In)</title>
+    
+    <!-- Google Font: Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SweetAlert2 (Popup แจ้งเตือน) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sarabun: ['Sarabun', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .required-star::after { content: " *"; color: #ef4444; }
+    </style>
+</head>
+<body class="bg-medical-50 text-gray-800 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-medical-700 to-medical-500 px-8 py-10 text-center text-white">
+            <h1 class="text-3xl font-bold mb-2">ระบบบันทึกข้อมูลการรับส่งต่อผู้ป่วย (Refer-In)</h1>
+            <p class="text-medical-100 text-lg">อำเภอกุสุมาลย์ จังหวัดสกลนคร</p>
+        </div>
+
+        <!-- Form Section -->
+        <div class="p-8">
+            <form id="referForm" class="space-y-6" onsubmit="handleFormSubmit(this); return false;">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 1. วันที่ -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="date">วันที่</label>
+                        <input type="date" id="date" name="date" required 
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
+                    </div>
+
+                    <!-- 2. ชื่อ-สกุล ผู้ป่วย -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="patientName">ชื่อ-นามสกุล ผู้ป่วย</label>
+                        <input type="text" id="patientName" name="patientName" required placeholder="นายตัวอย่าง ใจดี"
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
+                    </div>
+                </div>
+
+                <!-- 3. เลข ปชช. -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="idCard">เลขประจำตัวประชาชน (13 หลัก)</label>
+                    <input type="text" id="idCard" name="idCard" required 
+                        pattern="[0-9]{13}" maxlength="13" inputmode="numeric" placeholder="xxxxxxxxxxxxx"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
+                    <p class="text-xs text-gray-500 mt-1">กรอกเฉพาะตัวเลข 13 หลักเท่านั้น</p>
+                </div>
+
+                <!-- 4. ที่อยู่จริง -->
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
+                    <h3 class="font-semibold text-gray-700">ที่อยู่จริงของผู้ป่วย</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1 required-star" for="houseNo">บ้านเลขที่</label>
+                            <input type="text" id="houseNo" name="houseNo" required placeholder="เช่น 123/4"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1 required-star" for="moo">หมู่ที่</label>
+                            <input type="text" id="moo" name="moo" required placeholder="เช่น 1" inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1 required-star" for="subDistrict">ตำบล</label>
+                            <select id="subDistrict" name="subDistrict" required
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 outline-none transition bg-white">
+                                <option value="" disabled selected>-- เลือกตำบล --</option>
+                                <option value="นาโพธิ์">นาโพธิ์</option>
+                                <option value="นาเพียงใหม่">นาเพียงใหม่</option>
+                                <option value="โพธิไพศาล">โพธิไพศาล</option>
+                                <option value="อุ่มจาน">อุ่มจาน</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. อาการนำมา -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="symptoms">อาการนำมา (Chief Complaint)</label>
+                    <textarea id="symptoms" name="symptoms" rows="3" required placeholder="ระบุอาการสำคัญที่ทำให้ผู้ป่วยมาโรงพยาบาล"
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 resize-none"></textarea>
+                </div>
+
+                <!-- 6. การวินิจฉัยแรกรับ -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="diagnosis">การวินิจฉัยแรกรับ</label>
+                    <input type="text" id="diagnosis" name="diagnosis" required placeholder="ระบุการวินิจฉัยเบื้องต้น"
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
+                </div>
+
+                <!-- 7. นำส่งจาก รพ.สต. -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="pcu">นำส่งจาก รพ.สต.</label>
+                    <select id="pcu" name="pcu" required
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 bg-white">
+                        <option value="" disabled selected>-- เลือก รพ.สต. ต้นทาง --</option>
+                        <option value="รพ.สต.บ้านบอน">รพ.สต.บ้านบอน</option>
+                        <option value="รพ.สต.บ้านนาเพียงใหม่">รพ.สต.บ้านนาเพียงใหม่</option>
+                        <option value="รพ.สต.บ้านห้วยกอก">รพ.สต.บ้านห้วยกอก</option>
+                        <option value="รพ.สต.บ้านโพธิไพศาล">รพ.สต.บ้านโพธิไพศาล</option>
+                        <option value="รพ.สต.บ้านแสนพัน">รพ.สต.บ้านแสนพัน</option>
+                        <option value="รพ.สต.บ้านหนองบัวสร้าง">รพ.สต.บ้านหนองบัวสร้าง</option>
+                    </select>
+                </div>
+
+                <!-- 8. เจ้าหน้าที่ผู้รายงานข้อมูล -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="reporter">เจ้าหน้าที่ผู้รายงานข้อมูล</label>
+                    <input type="text" id="reporter" name="reporter" required placeholder="ชื่อ-สกุล เจ้าหน้าที่"
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4 mt-8 border-t border-gray-100">
+                    <button type="submit" 
+                        class="w-full bg-medical-600 hover:bg-medical-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-md hover:shadow-lg transition duration-300 transform hover:-translate-y-0.5">
+                        บันทึกข้อมูล
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ตั้งค่าวันที่เริ่มต้นเป็นวันปัจจุบัน
+        function setDefaultDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        // เมื่อโหลดหน้าเว็บเสร็จให้เซ็ตค่าวันที่
+        document.addEventListener("DOMContentLoaded", setDefaultDate);
+
+        // ฟังก์ชันจัดการเมื่อกด Submit
+        function handleFormSubmit(formObject) {
+            
+            // แสดง Loading popup
+            Swal.fire({
+                title: 'กำลังบันทึกข้อมูล...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // เรียกใช้ฟังก์ชัน processForm ใน Google Apps Script
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    if(response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกสำเร็จ!',
+                            text: response.message,
+                            confirmButtonColor: '#059669',
+                            confirmButtonText: 'ตกลง'
+                        }).then(() => {
+                            // ล้างข้อมูลฟอร์ม และเซ็ตวันที่กลับเป็นวันปัจจุบัน
+                            document.getElementById("referForm").reset();
+                            setDefaultDate();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'เกิดข้อผิดพลาด',
+                            text: response.message,
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'การเชื่อมต่อขัดข้อง',
+                        text: 'กรุณาลองใหม่อีกครั้ง: ' + error.message,
+                        confirmButtonColor: '#ef4444'
+                    });
+                })
+                .processForm(formObject);
+        }
+    </script>
+</body>
+</html>
