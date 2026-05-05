@@ -16,6 +16,11 @@
     <!-- SweetAlert2 (Popup แจ้งเตือน) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Flatpickr (ปฏิทินภาษาไทย) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -39,6 +44,7 @@
     <style>
         body { font-family: 'Sarabun', sans-serif; }
         .required-star::after { content: " *"; color: #ef4444; }
+        .flatpickr-calendar { font-family: 'Sarabun', sans-serif; } /* เปลี่ยนฟอนต์ในปฏิทิน */
     </style>
 </head>
 <body class="bg-medical-50 text-gray-800 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -47,8 +53,8 @@
         
         <!-- Header Section -->
         <div class="bg-gradient-to-r from-medical-700 to-medical-500 px-8 py-10 text-center text-white">
-            <h1 class="text-3xl font-bold mb-2">ระบบบันทึกข้อมูลการรับส่งต่อผู้ป่วย (Refer-In)</h1>
-            <p class="text-medical-100 text-lg">อำเภอกุสุมาลย์ จังหวัดสกลนคร</p>
+            <h1 class="text-2xl font-bold mb-2">ระบบบันทึกข้อมูลการรับส่งต่อผู้ป่วย (Refer-In)</h1>
+            <p class="text-medical-100 text-lg font-bold">อำเภอกุสุมาลย์ จังหวัดสกลนคร</p>
         </div>
 
         <!-- Form Section -->
@@ -59,8 +65,8 @@
                     <!-- 1. วันที่ -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="date">วันที่</label>
-                        <input type="date" id="date" name="date" required 
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
+                        <input type="text" id="date" name="date" required placeholder="เลือกวันที่"
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 bg-white">
                     </div>
 
                     <!-- 2. ชื่อ-สกุล ผู้ป่วย -->
@@ -112,8 +118,8 @@
 
                 <!-- 5. อาการนำมา -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="symptoms">อาการนำมา (Chief Complaint)</label>
-                    <textarea id="symptoms" name="symptoms" rows="3" required placeholder="ระบุอาการสำคัญที่ทำให้ผู้ป่วยมาโรงพยาบาล"
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="symptoms">อาการที่มา รพ.สต. (Chief Complaint)</label>
+                    <textarea id="symptoms" name="symptoms" rows="3" required placeholder="ระบุอาการสำคัญที่ทำให้ผู้ป่วยมา รพ.สต."
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 resize-none"></textarea>
                 </div>
 
@@ -129,7 +135,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="pcu">นำส่งจาก รพ.สต.</label>
                     <select id="pcu" name="pcu" required
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 bg-white">
-                        <option value="" disabled selected>-- เลือก รพ.สต. ต้นทาง --</option>
+                        <option value="" disabled selected>-- รพ.สต. ต้นทาง --</option>
                         <option value="รพ.สต.บ้านบอน">รพ.สต.บ้านบอน</option>
                         <option value="รพ.สต.บ้านนาเพียงใหม่">รพ.สต.บ้านนาเพียงใหม่</option>
                         <option value="รพ.สต.บ้านห้วยกอก">รพ.สต.บ้านห้วยกอก</option>
@@ -159,17 +165,30 @@
     </div>
 
     <script>
-        // ตั้งค่าวันที่เริ่มต้นเป็นวันปัจจุบัน
-        function setDefaultDate() {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
-        }
+        // ตัวแปรเก็บ instance ของปฏิทิน
+        let datePicker;
 
-        // เมื่อโหลดหน้าเว็บเสร็จให้เซ็ตค่าวันที่
-        document.addEventListener("DOMContentLoaded", setDefaultDate);
+        // เมื่อโหลดหน้าเว็บเสร็จให้ตั้งค่า Flatpickr
+        document.addEventListener("DOMContentLoaded", function() {
+            datePicker = flatpickr("#date", {
+                locale: "th", // ตั้งเป็นภาษาไทย
+                altInput: true, // สร้างช่องแสดงผลแยกจากค่าที่ส่งไป
+                altInputClass: "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 bg-white",
+                altFormat: "thai", // รูปแบบที่ตั้งค่าเองด้านล่าง
+                dateFormat: "Y-m-d", // ค่าที่ส่งไปเก็บในชีต (เช่น 2026-05-05)
+                defaultDate: "today", // เริ่มต้นเป็นวันปัจจุบัน
+                formatDate: (date, format, locale) => {
+                    // สร้างรูปแบบ "5 พฤษภาคม 2569"
+                    if (format === "thai") {
+                        const d = date.getDate();
+                        const m = flatpickr.l10ns.th.months.longhand[date.getMonth()];
+                        const y = date.getFullYear() + 543; // แปลงปี ค.ศ. เป็น พ.ศ.
+                        return `${d} ${m} ${y}`;
+                    }
+                    return flatpickr.formatDate(date, format);
+                }
+            });
+        });
 
         // ฟังก์ชันจัดการเมื่อกด Submit
         function handleFormSubmit(formObject) {
@@ -197,7 +216,7 @@
                         }).then(() => {
                             // ล้างข้อมูลฟอร์ม และเซ็ตวันที่กลับเป็นวันปัจจุบัน
                             document.getElementById("referForm").reset();
-                            setDefaultDate();
+                            datePicker.setDate(new Date());
                         });
                     } else {
                         Swal.fire({
