@@ -159,60 +159,60 @@
     </div>
 
     <div style="position: absolute; left: -9999px; top: 0; z-index: -1;">
-        <div id="pdfTemplate" style="width: 210mm; min-height: 297mm; padding: 25mm 20mm; background: white; color: black; font-family: 'Sarabun', sans-serif; box-sizing: border-box;">
+        <div id="pdfTemplate" style="width: 210mm; min-height: 297mm; padding: 20mm; background: white; color: black; font-family: 'Sarabun', sans-serif; box-sizing: border-box; line-height: 1.5;">
             
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="font-size: 26px; font-weight: bold; margin: 0 0 5px 0;">ใบรายงานการรับส่งต่อผู้ป่วย (Refer-In)</h1>
-                <h2 style="font-size: 18px; font-weight: normal; margin: 0; color: #333;">อำเภอกุสุมาลย์ จังหวัดสกลนคร</h2>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 5px 0;">ใบรายงานการรับส่งต่อผู้ป่วย (Refer-In)</h1>
+                <h2 style="font-size: 16px; font-weight: normal; margin: 0; color: #333;">อำเภอกุสุมาลย์ จังหวัดสกลนคร</h2>
             </div>
             
-            <hr style="border-top: 2px solid #059669; margin-bottom: 30px;">
+            <hr style="border-top: 2px solid #059669; margin-bottom: 15px;">
 
-            <table style="width: 100%; border-collapse: collapse; font-size: 16px; line-height: 2;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 16px;">
                 <tr>
-                    <td style="width: 160px; font-weight: bold; vertical-align: top;">วันที่รายงาน:</td>
-                    <td id="pdf-date"></td>
+                    <td style="width: 160px; font-weight: bold; vertical-align: top; padding: 4px 0;">วันที่รายงาน:</td>
+                    <td id="pdf-date" style="padding: 4px 0;"></td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; vertical-align: top;">นำส่งจาก:</td>
-                    <td id="pdf-pcu" style="color: #059669; font-weight: bold;"></td>
+                    <td style="font-weight: bold; vertical-align: top; padding: 4px 0;">นำส่งจาก:</td>
+                    <td id="pdf-pcu" style="color: #059669; font-weight: bold; padding: 4px 0;"></td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; vertical-align: top;">ชื่อ-นามสกุล ผู้ป่วย:</td>
-                    <td id="pdf-name"></td>
+                    <td style="font-weight: bold; vertical-align: top; padding: 4px 0;">ชื่อ-นามสกุล ผู้ป่วย:</td>
+                    <td id="pdf-name" style="padding: 4px 0;"></td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; vertical-align: top;">เลขประจำตัวประชาชน:</td>
-                    <td id="pdf-idcard"></td>
+                    <td style="font-weight: bold; vertical-align: top; padding: 4px 0;">เลขประจำตัวประชาชน:</td>
+                    <td id="pdf-idcard" style="padding: 4px 0;"></td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; vertical-align: top;">ที่อยู่ผู้ป่วย:</td>
-                    <td id="pdf-address"></td>
+                    <td style="font-weight: bold; vertical-align: top; padding: 4px 0;">ที่อยู่ผู้ป่วย:</td>
+                    <td id="pdf-address" style="padding: 4px 0;"></td>
                 </tr>
                 
                 <tr>
-                    <td colspan="2" style="font-weight: bold; padding-top: 20px; border-bottom: 1px solid #ddd;">ข้อมูลทางการแพทย์</td>
+                    <td colspan="2" style="font-weight: bold; padding-top: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">ข้อมูลทางการแพทย์</td>
                 </tr>
                 <tr>
                     <td colspan="2" style="font-weight: bold; padding-top: 10px;">อาการที่มา รพ.สต. (Chief Complaint):</td>
                 </tr>
                 <tr>
-                    <td colspan="2" id="pdf-symptoms" style="padding-left: 20px; padding-bottom: 15px; color: #444; white-space: pre-wrap;"></td>
+                    <td colspan="2" id="pdf-symptoms" style="padding-left: 20px; padding-bottom: 10px; color: #333; white-space: pre-wrap; padding-top: 4px;"></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="font-weight: bold;">การวินิจฉัยแรกรับ:</td>
+                    <td colspan="2" style="font-weight: bold; padding-top: 4px;">การวินิจฉัยแรกรับ:</td>
                 </tr>
                 <tr>
-                    <td colspan="2" id="pdf-diagnosis" style="padding-left: 20px; padding-bottom: 15px; color: #444;"></td>
+                    <td colspan="2" id="pdf-diagnosis" style="padding-left: 20px; padding-bottom: 10px; color: #333; padding-top: 4px;"></td>
                 </tr>
             </table>
 
-            <div style="margin-top: 60px; border-top: 1px dashed #ccc; padding-top: 20px;">
+            <div style="margin-top: 30px; border-top: 1px dashed #ccc; padding-top: 15px;">
                 <table style="width: 100%;">
                     <tr>
                         <td style="width: 50%;"></td>
                         <td style="width: 50%; text-align: center;">
-                            <p style="margin-bottom: 40px; font-size: 16px;">ผู้รายงานข้อมูล</p>
+                            <p style="margin-bottom: 25px; font-size: 16px;">ผู้รายงานข้อมูล</p>
                             <p style="margin: 0; font-size: 16px;">(ลงชื่อ) .......................................................</p>
                             <p style="margin: 5px 0 0 0; font-size: 16px;">(<span id="pdf-reporter"></span>)</p>
                             <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;" id="pdf-timestamp"></p>
@@ -225,7 +225,7 @@
     </div>
 
     <script>
-        // *** ⚠️ สำคัญมาก: ใส่ URL ของ Google Apps Script ที่ช่องนี้ ***
+        // *** ⚠️ สำคัญมาก: คุณต้องนำ URL ที่ขึ้นต้นด้วย https://script.google.com/macros/s/... มาใส่ตรงนี้ ***
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyKLhg4-M4LgHxiN68nSsBJnk4gMW4zs0s9FOLpizDUuVNu52D1OrRaRdhEBO6vgjAbOw/exec';
 
         let datePicker;
