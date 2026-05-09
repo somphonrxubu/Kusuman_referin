@@ -166,8 +166,8 @@
     </div>
 
     <script>
-        // *** สำคัญมาก: นำ URL ที่ได้จากการ Deploy แบบ Web App มาใส่ตรงนี้ ***
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyKLhg4-M4LgHxiN68nSsBJnk4gMW4zs0s9FOLpizDUuVNu52D1OrRaRdhEBO6vgjAbOw/exec';
+        // *** ⚠️ สำคัญมาก: คุณต้องนำ URL ที่ขึ้นต้นด้วย https://script.google.com/macros/s/... มาใส่ตรงนี้ ***
+        const scriptURL = 'ใส่_URL_WEB_APP_ของคุณที่นี่';
 
         // ตัวแปรเก็บ instance ของปฏิทิน
         let datePicker;
@@ -197,6 +197,17 @@
         // ฟังก์ชันจัดการเมื่อกด Submit
         function handleFormSubmit(formElement) {
             
+            // ตรวจสอบว่าเปลี่ยน URL หรือยัง
+            if (!scriptURL.startsWith('http')) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ลืมใส่ URL หรือเปล่า?',
+                    text: 'กรุณาแก้ไขบรรทัด const scriptURL ในโค้ด และใส่ URL ของ Google Apps Script ให้ถูกต้องก่อนบันทึกข้อมูลครับ',
+                    confirmButtonColor: '#059669'
+                });
+                return;
+            }
+
             Swal.fire({
                 title: 'กำลังบันทึกข้อมูล...',
                 text: 'กรุณารอสักครู่',
@@ -242,6 +253,56 @@
                     title: 'การเชื่อมต่อขัดข้อง',
                     text: 'กรุณาลองใหม่อีกครั้ง: ' + error.message,
                     confirmButtonColor: '#ef4444'
+                });
+            });
+        }
+
+        // ฟังก์ชันสร้างและดาวน์โหลด PDF
+        function generatePDF(formData) {
+            Swal.fire({
+                title: 'กำลังจัดเตรียม PDF...',
+                text: 'กรุณารอสักครู่ระบบกำลังวาดเอกสาร',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // ดึงค่าวันที่ที่ถูกแปลงเป็นภาษาไทยจากปฏิทิน
+            const selectedDateObj = datePicker.selectedDates[0];
+            const dateText = selectedDateObj ? datePicker.formatDate(selectedDateObj, "thai") : formData.get('date');
+
+            // นำข้อมูลจากฟอร์มมาหยอดใส่ในเทมเพลตที่ซ่อนไว้
+            document.getElementById('pdf-date').innerText = dateText;
+            document.getElementById('pdf-name').innerText = formData.get('patientName');
+            document.getElementById('pdf-idcard').innerText = formData.get('idCard');
+            document.getElementById('pdf-address').innerText = `บ้านเลขที่ ${formData.get('houseNo')} หมู่ที่ ${formData.get('moo')} ตำบล${formData.get('subDistrict')} อ.กุสุมาลย์ จ.สกลนคร`;
+            document.getElementById('pdf-symptoms').innerText = formData.get('symptoms');
+            document.getElementById('pdf-diagnosis').innerText = formData.get('diagnosis');
+            document.getElementById('pdf-pcu').innerText = formData.get('pcu');
+            document.getElementById('pdf-reporter').innerText = formData.get('reporter');
+            
+            // ประทับเวลาออกเอกสาร
+            const now = new Date();
+            document.getElementById('pdf-timestamp').innerText = `${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH')} น.`;
+
+            // กำหนดการตั้งค่าสำหรับการทำ PDF
+            const element = document.getElementById('pdfTemplate');
+            const opt = {
+                margin:       0, // ตัด Margin ออกเพราะจัดการผ่าน CSS padding ใน template แล้ว
+                filename:     `ใบนำส่ง_${formData.get('patientName')}.pdf`, // ตั้งชื่อไฟล์อัตโนมัติตามชื่อคนไข้
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true }, // เพิ่มความคมชัด (scale 2)
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // เรียกใช้ html2pdf ให้สร้างเอกสาร
+            html2pdf().set(opt).from(element).save().then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ดาวน์โหลดสำเร็จ',
+                    showConfirmButton: false,
+                    timer: 1500
                 });
             });
         }
