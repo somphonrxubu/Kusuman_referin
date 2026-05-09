@@ -21,6 +21,9 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
 
+    <!-- html2pdf.js (สร้างไฟล์ PDF) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -44,13 +47,13 @@
     <style>
         body { font-family: 'Sarabun', sans-serif; }
         .required-star::after { content: " *"; color: #ef4444; }
-        .flatpickr-calendar { font-family: 'Sarabun', sans-serif; } /* เปลี่ยนฟอนต์ในปฏิทิน */
-        .flatpickr-wrapper { width: 100%; display: block; } /* แก้ไขปัญหาช่องวันที่ล้นกรอบในมือถือ */
+        .flatpickr-calendar { font-family: 'Sarabun', sans-serif; } 
+        .flatpickr-wrapper { width: 100%; display: block; } 
     </style>
 </head>
-<body class="bg-medical-50 text-gray-800 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+<body class="bg-medical-50 text-gray-800 min-h-screen py-8 px-4 sm:px-6 lg:px-8 relative">
 
-    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 relative z-10">
         
         <!-- Header Section -->
         <div class="bg-gradient-to-r from-medical-700 to-medical-500 px-8 py-10 text-center text-white">
@@ -63,14 +66,12 @@
             <form id="referForm" class="space-y-6" onsubmit="handleFormSubmit(this); return false;">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- 1. วันที่ -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="date">วันที่</label>
                         <input type="text" id="date" name="date" required placeholder="เลือกวันที่"
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 bg-white">
                     </div>
 
-                    <!-- 2. ชื่อ-สกุล ผู้ป่วย -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="patientName">ชื่อ-นามสกุล ผู้ป่วย</label>
                         <input type="text" id="patientName" name="patientName" required placeholder="นายตัวอย่าง ใจดี"
@@ -78,17 +79,14 @@
                     </div>
                 </div>
 
-                <!-- 3. เลข ปชช. -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="idCard">เลขประจำตัวประชาชน (13 หลัก)</label>
                     <input type="text" id="idCard" name="idCard" required 
                         pattern="[0-9]{13}" maxlength="13" inputmode="numeric" placeholder="xxxxxxxxxxxxx"
                         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
-                    <p class="text-xs text-gray-500 mt-1">กรอกเฉพาะตัวเลข 13 หลักเท่านั้น</p>
                 </div>
 
-                <!-- 4. ที่อยู่จริง -->
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
                     <h3 class="font-semibold text-gray-700">ที่อยู่จริงของผู้ป่วย</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -117,21 +115,18 @@
                     </div>
                 </div>
 
-                <!-- 5. อาการนำมา -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="symptoms">อาการที่มา รพ.สต. (Chief Complaint)</label>
                     <textarea id="symptoms" name="symptoms" rows="3" required placeholder="ระบุอาการสำคัญที่ทำให้ผู้ป่วยมา รพ.สต."
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200 resize-none"></textarea>
                 </div>
 
-                <!-- 6. การวินิจฉัยแรกรับ -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="diagnosis">การวินิจฉัยแรกรับ</label>
                     <input type="text" id="diagnosis" name="diagnosis" required placeholder="ระบุการวินิจฉัยเบื้องต้น"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
                 </div>
 
-                <!-- 7. นำส่งจาก รพ.สต. -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="pcu">นำส่งจาก รพ.สต.</label>
                     <select id="pcu" name="pcu" required
@@ -146,14 +141,12 @@
                     </select>
                 </div>
 
-                <!-- 8. เจ้าหน้าที่ผู้รายงานข้อมูล -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2 required-star" for="reporter">เจ้าหน้าที่ผู้รายงานข้อมูล</label>
                     <input type="text" id="reporter" name="reporter" required placeholder="ชื่อ-สกุล เจ้าหน้าที่"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-medical-500 focus:border-medical-500 outline-none transition duration-200">
                 </div>
 
-                <!-- Submit Button -->
                 <div class="pt-4 mt-8 border-t border-gray-100">
                     <button type="submit" 
                         class="w-full bg-medical-600 hover:bg-medical-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-md hover:shadow-lg transition duration-300 transform hover:-translate-y-0.5">
@@ -165,14 +158,78 @@
         </div>
     </div>
 
+    <div style="position: absolute; left: -9999px; top: 0; z-index: -1;">
+        <div id="pdfTemplate" style="width: 210mm; min-height: 297mm; padding: 25mm 20mm; background: white; color: black; font-family: 'Sarabun', sans-serif; box-sizing: border-box;">
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="font-size: 26px; font-weight: bold; margin: 0 0 5px 0;">ใบรายงานการรับส่งต่อผู้ป่วย (Refer-In)</h1>
+                <h2 style="font-size: 18px; font-weight: normal; margin: 0; color: #333;">อำเภอกุสุมาลย์ จังหวัดสกลนคร</h2>
+            </div>
+            
+            <hr style="border-top: 2px solid #059669; margin-bottom: 30px;">
+
+            <table style="width: 100%; border-collapse: collapse; font-size: 16px; line-height: 2;">
+                <tr>
+                    <td style="width: 160px; font-weight: bold; vertical-align: top;">วันที่รายงาน:</td>
+                    <td id="pdf-date"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; vertical-align: top;">นำส่งจาก:</td>
+                    <td id="pdf-pcu" style="color: #059669; font-weight: bold;"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; vertical-align: top;">ชื่อ-นามสกุล ผู้ป่วย:</td>
+                    <td id="pdf-name"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; vertical-align: top;">เลขประจำตัวประชาชน:</td>
+                    <td id="pdf-idcard"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; vertical-align: top;">ที่อยู่ผู้ป่วย:</td>
+                    <td id="pdf-address"></td>
+                </tr>
+                
+                <tr>
+                    <td colspan="2" style="font-weight: bold; padding-top: 20px; border-bottom: 1px solid #ddd;">ข้อมูลทางการแพทย์</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="font-weight: bold; padding-top: 10px;">อาการที่มา รพ.สต. (Chief Complaint):</td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="pdf-symptoms" style="padding-left: 20px; padding-bottom: 15px; color: #444; white-space: pre-wrap;"></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="font-weight: bold;">การวินิจฉัยแรกรับ:</td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="pdf-diagnosis" style="padding-left: 20px; padding-bottom: 15px; color: #444;"></td>
+                </tr>
+            </table>
+
+            <div style="margin-top: 60px; border-top: 1px dashed #ccc; padding-top: 20px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 50%;"></td>
+                        <td style="width: 50%; text-align: center;">
+                            <p style="margin-bottom: 40px; font-size: 16px;">ผู้รายงานข้อมูล</p>
+                            <p style="margin: 0; font-size: 16px;">(ลงชื่อ) .......................................................</p>
+                            <p style="margin: 5px 0 0 0; font-size: 16px;">(<span id="pdf-reporter"></span>)</p>
+                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;" id="pdf-timestamp"></p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+
     <script>
-        // *** ⚠️ สำคัญมาก: คุณต้องนำ URL ที่ขึ้นต้นด้วย https://script.google.com/macros/s/... มาใส่ตรงนี้ ***
+        // *** ⚠️ สำคัญมาก: ใส่ URL ของ Google Apps Script ที่ช่องนี้ ***
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyKLhg4-M4LgHxiN68nSsBJnk4gMW4zs0s9FOLpizDUuVNu52D1OrRaRdhEBO6vgjAbOw/exec';
 
-        // ตัวแปรเก็บ instance ของปฏิทิน
         let datePicker;
 
-        // เมื่อโหลดหน้าเว็บเสร็จให้ตั้งค่า Flatpickr
         document.addEventListener("DOMContentLoaded", function() {
             datePicker = flatpickr("#date", {
                 locale: "th",
@@ -194,15 +251,12 @@
             });
         });
 
-        // ฟังก์ชันจัดการเมื่อกด Submit
         function handleFormSubmit(formElement) {
-            
-            // ตรวจสอบว่าเปลี่ยน URL หรือยัง
             if (!scriptURL.startsWith('http')) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'ลืมใส่ URL หรือเปล่า?',
-                    text: 'กรุณาแก้ไขบรรทัด const scriptURL ในโค้ด และใส่ URL ของ Google Apps Script ให้ถูกต้องก่อนบันทึกข้อมูลครับ',
+                    text: 'กรุณาแก้ไขบรรทัด const scriptURL ให้ถูกต้องก่อนบันทึกข้อมูลครับ',
                     confirmButtonColor: '#059669'
                 });
                 return;
@@ -217,24 +271,31 @@
                 }
             });
 
-            // แปลงข้อมูลจากฟอร์มเป็น FormData
             const formData = new FormData(formElement);
 
-            // ส่งข้อมูลผ่าน API ด้วย fetch ไปยัง Google Apps Script
             fetch(scriptURL, { 
                 method: 'POST', 
                 body: formData 
             })
-            .then(response => response.json()) // แปลงผลลัพธ์กลับมาเป็น JSON
+            .then(response => response.json())
             .then(data => {
                 if(data.success) {
+                    // หากบันทึกสำเร็จ ให้ถามว่าจะโหลด PDF ไหม
                     Swal.fire({
                         icon: 'success',
-                        title: 'บันทึกสำเร็จ!',
-                        text: data.message,
+                        title: 'บันทึกข้อมูลสำเร็จ!',
+                        text: 'ต้องการดาวน์โหลดเอกสารใบนำส่งเป็นไฟล์ PDF หรือไม่?',
+                        showCancelButton: true,
                         confirmButtonColor: '#059669',
-                        confirmButtonText: 'ตกลง'
-                    }).then(() => {
+                        cancelButtonColor: '#9ca3af',
+                        confirmButtonText: 'ดาวน์โหลด PDF',
+                        cancelButtonText: 'ปิดหน้านี้',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            generatePDF(formData); // เรียกใช้ฟังก์ชันดาวน์โหลด PDF
+                        }
+                        // ล้างฟอร์มเพื่อรับผู้ป่วยคนต่อไป
                         formElement.reset();
                         datePicker.setDate(new Date());
                     });
@@ -257,22 +318,20 @@
             });
         }
 
-        // ฟังก์ชันสร้างและดาวน์โหลด PDF
+        // ฟังก์ชันสำหรับจัดเตรียมและดาวน์โหลด PDF
         function generatePDF(formData) {
             Swal.fire({
-                title: 'กำลังจัดเตรียม PDF...',
-                text: 'กรุณารอสักครู่ระบบกำลังวาดเอกสาร',
+                title: 'กำลังสร้างไฟล์ PDF...',
+                text: 'กรุณารอสักครู่',
                 allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+                didOpen: () => { Swal.showLoading(); }
             });
 
-            // ดึงค่าวันที่ที่ถูกแปลงเป็นภาษาไทยจากปฏิทิน
+            // ดึงวันที่ภาษาไทยจากปฏิทิน
             const selectedDateObj = datePicker.selectedDates[0];
             const dateText = selectedDateObj ? datePicker.formatDate(selectedDateObj, "thai") : formData.get('date');
 
-            // นำข้อมูลจากฟอร์มมาหยอดใส่ในเทมเพลตที่ซ่อนไว้
+            // นำข้อมูลไปใส่ใน Template
             document.getElementById('pdf-date').innerText = dateText;
             document.getElementById('pdf-name').innerText = formData.get('patientName');
             document.getElementById('pdf-idcard').innerText = formData.get('idCard');
@@ -282,21 +341,21 @@
             document.getElementById('pdf-pcu').innerText = formData.get('pcu');
             document.getElementById('pdf-reporter').innerText = formData.get('reporter');
             
-            // ประทับเวลาออกเอกสาร
             const now = new Date();
-            document.getElementById('pdf-timestamp').innerText = `${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH')} น.`;
+            document.getElementById('pdf-timestamp').innerText = `พิมพ์เมื่อ: ${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH')} น.`;
 
-            // กำหนดการตั้งค่าสำหรับการทำ PDF
+            // ตั้งค่าการพิมพ์
             const element = document.getElementById('pdfTemplate');
+            const patientName = formData.get('patientName').replace(/\s/g, '_'); // เอาช่องว่างออกจากชื่อไฟล์
             const opt = {
-                margin:       0, // ตัด Margin ออกเพราะจัดการผ่าน CSS padding ใน template แล้ว
-                filename:     `ใบนำส่ง_${formData.get('patientName')}.pdf`, // ตั้งชื่อไฟล์อัตโนมัติตามชื่อคนไข้
+                margin:       0,
+                filename:     `ใบนำส่ง_${patientName}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true }, // เพิ่มความคมชัด (scale 2)
+                html2canvas:  { scale: 2, useCORS: true }, // scale 2 เพื่อให้ตัวหนังสือคมชัด
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // เรียกใช้ html2pdf ให้สร้างเอกสาร
+            // สร้างและบันทึกไฟล์
             html2pdf().set(opt).from(element).save().then(() => {
                 Swal.fire({
                     icon: 'success',
