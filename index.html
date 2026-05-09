@@ -159,7 +159,8 @@
     </div>
 
     <div style="position: absolute; left: -9999px; top: 0; z-index: -1;">
-        <div id="pdfTemplate" style="width: 210mm; min-height: 297mm; padding: 20mm; background: white; color: black; font-family: 'Sarabun', sans-serif; box-sizing: border-box; line-height: 1.5;">
+        <!-- แก้ไข padding จาก 20mm เป็น 8mm 20mm 20mm 20mm (บน 8mm, ขวา ล่าง ซ้าย 20mm) -->
+        <div id="pdfTemplate" style="width: 210mm; min-height: 297mm; padding: 8mm 20mm 20mm 20mm; background: white; color: black; font-family: 'Sarabun', sans-serif; box-sizing: border-box; line-height: 1.5;">
             
             <div style="text-align: center; margin-bottom: 15px;">
                 <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 5px 0;">ใบรายงานการรับส่งต่อผู้ป่วย (Refer-In)</h1>
@@ -280,20 +281,20 @@
             .then(response => response.json())
             .then(data => {
                 if(data.success) {
-                    // หากบันทึกสำเร็จ ให้ถามว่าจะโหลด PDF ไหม
+                    // เปลี่ยนข้อความแจ้งเตือนให้เข้ากับการดูตัวอย่าง
                     Swal.fire({
                         icon: 'success',
                         title: 'บันทึกข้อมูลสำเร็จ!',
-                        text: 'ต้องการดาวน์โหลดเอกสารใบนำส่งเป็นไฟล์ PDF หรือไม่?',
+                        text: 'ต้องการดูตัวอย่างและดาวน์โหลดเอกสาร PDF หรือไม่?',
                         showCancelButton: true,
                         confirmButtonColor: '#059669',
                         cancelButtonColor: '#9ca3af',
-                        confirmButtonText: 'ดาวน์โหลด PDF',
+                        confirmButtonText: 'ดูตัวอย่าง PDF',
                         cancelButtonText: 'ปิดหน้านี้',
                         reverseButtons: true
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            generatePDF(formData); // เรียกใช้ฟังก์ชันดาวน์โหลด PDF
+                            generatePDF(formData); // เรียกใช้ฟังก์ชันเปิดดู PDF
                         }
                         // ล้างฟอร์มเพื่อรับผู้ป่วยคนต่อไป
                         formElement.reset();
@@ -318,10 +319,10 @@
             });
         }
 
-        // ฟังก์ชันสำหรับจัดเตรียมและดาวน์โหลด PDF
+        // ฟังก์ชันสำหรับจัดเตรียมและแสดงตัวอย่าง PDF
         function generatePDF(formData) {
             Swal.fire({
-                title: 'กำลังสร้างไฟล์ PDF...',
+                title: 'กำลังสร้างตัวอย่างเอกสาร...',
                 text: 'กรุณารอสักครู่',
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
@@ -355,13 +356,36 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // สร้างและบันทึกไฟล์
-            html2pdf().set(opt).from(element).save().then(() => {
+            // สร้างเอกสาร PDF และส่งออกเป็นลิงก์ดูตัวอย่าง (Blob URL)
+            html2pdf().set(opt).from(element).output('bloburl').then(function(pdfUrl) {
+                // แสดงตัวอย่าง PDF ในหน้าต่าง Pop-up
                 Swal.fire({
-                    icon: 'success',
-                    title: 'ดาวน์โหลดสำเร็จ',
-                    showConfirmButton: false,
-                    timer: 1500
+                    title: 'ตัวอย่างใบนำส่งผู้ป่วย',
+                    html: `<iframe src="${pdfUrl}#toolbar=0" style="width: 100%; height: 60vh; border: 1px solid #e5e7eb; border-radius: 8px; background: #f3f4f6;"></iframe>`,
+                    width: '800px', // ขยายหน้าต่างให้กว้างพอสำหรับดู A4
+                    showCancelButton: true,
+                    confirmButtonText: 'ดาวน์โหลด PDF',
+                    cancelButtonText: 'ปิดหน้านี้',
+                    confirmButtonColor: '#059669',
+                    cancelButtonColor: '#9ca3af',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // จำลองการคลิกเพื่อดาวน์โหลดไฟล์ลงเครื่อง
+                        const link = document.createElement('a');
+                        link.href = pdfUrl;
+                        link.download = `ใบนำส่ง_${patientName}.pdf`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ดาวน์โหลดสำเร็จ',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    }
                 });
             });
         }
